@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="toolbar">
+        <div class="tool" id="pencil">
+            <img src="./NewIcons/Black_Pencil.svg" alt=""
+            class="tool-img">
+            <div class="size-box">
+                <div class="size1 size"></div>
+                <div class="size2 size"></div>
+                <div class="size3 size"></div>
+                <div class="size4 size"></div>
+            </div>
+        </div>
+        <div class="tool" id="eraser">
+            <img src="./NewIcons/Eraser.svg" alt=""
+            class="tool-img">
+            <div class="size-box">
+                <div class="size1 size"></div>
+                <div class="size2 size"></div>
+                <div class="size3 size"></div>
+                <div class="size4 size"></div>
+            </div>
+        </div>
+        <div class="tool" id="rect">
+            <i class="fad fa-square-full"></i>
+            <div class="size-box">
+                <div class="size1 size"></div>
+                <div class="size2 size"></div>
+                <div class="size3 size"></div>
+                <div class="size4 size"></div>
+            </div>
+        </div>
+        <div class="tool" id="line">
+            <i class="fas fa-grip-lines-vertical"></i>
+            <div class="size-box">
+                <div class="size1 size"></div>
+                <div class="size2 size"></div>
+                <div class="size3 size"></div>
+                <div class="size4 size"></div>
+            </div>
+        </div>
+        <div class="color-container">
+            <div class="color red"></div>
+            <div class="color blue"></div>
+            <div class="color green"></div>
+        </div>
+    </div>
+    <!--canvas here-->
+    <canvas></canvas>
+    <script>
+        let colorRed=document.querySelector(".red");
+        let colorBlue=document.querySelector(".blue");
+        let colorGreen=document.querySelector(".green");
+        let canvasBoard=document.querySelector("canvas"); 
+        let body=document.querySelector("body"); 
+        let pencilTool=document.querySelector("#pencil");
+        let eraserTool=document.querySelector("#eraser");
+        let rectTool=document.querySelector("#rect");
+        let lineTool=document.querySelector("#line");
+        let options=document.querySelectorAll(".size-box");
+        let cTool="rectTool";
+        let tool=canvasBoard.getContext("2d");
+        let boardTop=canvasBoard.getBoundingClientRect().top;
+        let boardLeft=canvasBoard.getBoundingClientRect().left;
+        let ix,iy,fx,fy;
+        let drawingMode=false;
+        let clearingMode=false;
+
+        canvasBoard.height=window.innerHeight;
+        canvasBoard.width=window.innerWidth;
+   
+
+/*color change and tool change logic*/
+    
+        colorRed.addEventListener("click",function(e){
+            tool.strokeStyle="lightpink";
+        });
+        colorBlue.addEventListener("click",function(e){
+            tool.strokeStyle="lightblue";
+        });
+        colorGreen.addEventListener("click",function(e){
+            tool.strokeStyle="lightgreen";
+        });
+        pencilTool.addEventListener("click", function(e){
+            cTool="pencilTool";
+            console.log("tool changed to ",cTool);
+            options[0].style.display = "flex";
+            for (let k=0 ; k< options.length ; ++k){
+                if(k==0)
+                    continue;
+                options[k].style.display="none";
+            }
+        })
+        eraserTool.addEventListener("click", function(e){
+            cTool="eraserTool";
+            console.log("tool changed to ",cTool);
+            options[1].style.display="flex";
+            for (let k=0 ; k< options.length ; ++k){
+                if(k==1)
+                    continue;
+                options[k].style.display="none";
+            }
+        })
+        rectTool.addEventListener("click",function(e){
+            cTool="rectTool";
+            console.log("tool changed to ",cTool);
+            options[2].style.display="flex";
+            for (let k=0 ; k< options.length ; ++k){
+                if(k==2)
+                    continue;
+                options[k].style.display="none";
+            }
+        });
+        lineTool.addEventListener("click",function(e){
+            cTool="lineTool";
+            console.log("tool changed to ",cTool);
+            options[3].style.display="flex";
+            for (let k=0 ; k< options.length ; ++k){
+                if(k==3)
+                    continue;
+                options[k].style.display="none";
+            }
+        });
+
+
+/*drawing logic*/
+        canvasBoard.addEventListener("click", function(e){
+            for (let k=0 ; k< options.length ; ++k){
+                options[k].style.display="none";
+            }
+        })
+        body.addEventListener("mousedown",function(e){
+            //alert("mouse was pressed!");
+            ix=e.clientX+boardLeft;
+            iy=e.clientY-boardTop;
+            if(cTool=="pencilTool"){
+                drawingMode=true;
+                tool.beginPath();
+                tool.moveTo(ix,iy);
+            }else if(cTool=="eraserTool"){
+                clearingMode=true;
+            }
+        });
+        body.addEventListener("mouseup",function(e){
+            //alert("mouse was lifted!");
+            fx=e.clientX+boardLeft;
+            fy=e.clientY-boardTop;
+            let width=fx-ix;
+            let height=fy-iy;
+            if(cTool=="rectTool"){
+                tool.strokeRect(ix,iy,width,height);
+            }else if(cTool=="lineTool"){
+                tool.beginPath();
+                tool.moveTo(ix,iy);
+                tool.lineTo(fx,fy);
+                tool.stroke();
+            }else if(cTool=="pencilTool"){
+                drawingMode=false;
+            }else if(cTool=="eraserTool"){
+                clearingMode=false;
+            }
+        });
+    
+        body.addEventListener("mousemove",function(e){
+            if(cTool=="pencilTool"){
+                if(drawingMode==false)
+                    return;
+                fx=e.clientX+boardLeft;
+                fy=e.clientY-boardTop;
+                tool.lineTo(fx,fy);
+                tool.stroke();
+                ix=fx;
+                iy=fy;
+            }else if(cTool=="eraserTool"){
+                if(clearingMode==false)
+                    return;
+                fx=e.clientX+boardLeft;
+                fy=e.clientY-boardTop;
+                tool.clearRect(fx,fy,20,20);
+            }
+        });
+    </script>
+    
+</body>
+</html>
